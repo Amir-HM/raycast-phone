@@ -4,8 +4,11 @@
   "title": "Phone",
   "description": "Call anyone in your Contacts through your iPhone in two keystrokes via macOS Continuity.",
   "icon": "extension-icon.png",
-  "author": "amir",
-  "categories": ["Communication", "Productivity"],
+  "author": "amir01",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
   "keywords": [
     "phone",
     "call",
@@ -16,8 +19,8 @@
     "facetime",
     "continuity",
     "iphone",
-    "speed dial",
-    "click to call",
+    "speeddial",
+    "click-to-call",
     "ring"
   ],
   "license": "MIT",
@@ -25,8 +28,8 @@
     {
       "name": "call",
       "title": "Call",
-      "subtitle": "Phone",
-      "description": "Search a contact and call them through your iPhone with one keystroke.",
+      "subtitle": "Continuity",
+      "description": "Search your contacts and call them through your iPhone with one keystroke.",
       "mode": "view",
       "keywords": [
         "phone",
@@ -36,7 +39,7 @@
         "continuity",
         "iphone",
         "ring",
-        "speed dial"
+        "speeddial"
       ],
       "arguments": [
         {
@@ -50,15 +53,36 @@
     {
       "name": "refresh-contacts",
       "title": "Refresh Contacts",
-      "subtitle": "Phone",
+      "subtitle": "Continuity",
       "description": "Rebuild the cached contacts list from macOS Contacts.",
       "mode": "no-view",
-      "keywords": ["contacts", "refresh", "sync", "reload"]
+      "keywords": [
+        "contacts",
+        "refresh",
+        "sync",
+        "reload"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "What happens when you press Enter on a contact.",
+      "type": "dropdown",
+      "default": "tel",
+      "required": false,
+      "data": [
+        { "title": "Call (Phone)", "value": "tel" },
+        { "title": "FaceTime Audio", "value": "facetime-audio" },
+        { "title": "FaceTime Video", "value": "facetime" }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.16",
-    "@raycast/utils": "^2.2.4"
+    "@raycast/utils": "^2.2.4",
+    "libphonenumber-js": "^1.13.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

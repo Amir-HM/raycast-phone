@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  getPreferenceValues,
   Icon,
   LaunchProps,
   List,
@@ -12,9 +13,12 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Contact, clearContactsCache, loadContacts } from "./contacts";
+import { formatDisplay, getCountryFlag } from "./format";
 import { frecencyScore, getFrecency, recordCall } from "./frecency";
 
 type FrecencyMap = Awaited<ReturnType<typeof getFrecency>>;
+type DialScheme = "tel" | "facetime-audio" | "facetime";
+type Prefs = { defaultAction: DialScheme };
 
 type CallArgs = { name?: string };
 
@@ -70,7 +74,21 @@ function rankContacts(contacts: Contact[], frecency: FrecencyMap): Contact[] {
   });
 }
 
+const ACTION_VERB: Record<DialScheme, string> = {
+  tel: "Call",
+  "facetime-audio": "FaceTime Audio",
+  facetime: "FaceTime Video",
+};
+
+const ACTION_ICON: Record<DialScheme, Icon> = {
+  tel: Icon.Phone,
+  "facetime-audio": Icon.Microphone,
+  facetime: Icon.Video,
+};
+
 export default function Command(props: LaunchProps<{ arguments: CallArgs }>) {
+  const prefs = getPreferenceValues<Prefs>();
+  const defaultScheme: DialScheme = prefs.defaultAction ?? "tel";
   const initialQuery = props.arguments?.name?.trim() ?? "";
   const [searchText, setSearchText] = useState(initialQuery);
 
@@ -98,7 +116,7 @@ export default function Command(props: LaunchProps<{ arguments: CallArgs }>) {
   async function dial(
     contactId: string,
     phoneValue: string,
-    scheme: "tel" | "facetime-audio" | "facetime",
+    scheme: DialScheme,
   ) {
     await recordCall(contactId, phoneValue);
     try {
@@ -129,7 +147,7 @@ export default function Command(props: LaunchProps<{ arguments: CallArgs }>) {
     const primary = target.phones[0];
     autoDialedRef.current = true;
     (async () => {
-      await dial(target.id, primary.value, "tel");
+      await dial(target.id, primary.value, defaultScheme);
       await popToRoot();
     })();
   }, [initialQuery, isLoading, filtered]);
@@ -176,25 +194,27 @@ export default function Command(props: LaunchProps<{ arguments: CallArgs }>) {
       ) : (
         ranked.map((c) => {
           const primary = c.phones[0];
+          const primaryDisplay = formatDisplay(primary.value);
+          const flag = getCountryFlag(primary.value);
+          const accessories: List.Item.Accessory[] = [];
+          if (flag) accessories.push({ text: flag });
+          if (c.phones.length > 1)
+            accessories.push({ text: `${c.phones.length} numbers` });
           return (
             <List.Item
               key={c.id}
               icon={Icon.Person}
               title={c.name}
-              subtitle={`${primary.label} · ${primary.value}`}
+              subtitle={`${primary.label} · ${primaryDisplay}`}
               keywords={c.phones.map((p) => p.value)}
-              accessories={
-                c.phones.length > 1
-                  ? [{ text: `${c.phones.length} numbers` }]
-                  : undefined
-              }
+              accessories={accessories.length > 0 ? accessories : undefined}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
                     <Action
-                      title={`Call ${primary.label}`}
-                      icon={Icon.Phone}
-                      onAction={() => dial(c.id, primary.value, "tel")}
+                      title={`${ACTION_VERB[defaultScheme]} ${primary.label}`}
+                      icon={ACTION_ICON[defaultScheme]}
+                      onAction={() => dial(c.id, primary.value, defaultScheme)}
                     />
                   </ActionPanel.Section>
                   {c.phones.length > 1 && (
@@ -202,28 +222,40 @@ export default function Command(props: LaunchProps<{ arguments: CallArgs }>) {
                       {c.phones.slice(1).map((p, idx) => (
                         <Action
                           key={`${idx}-${p.label}-${p.value}`}
-                          title={`Call ${p.label} · ${p.value}`}
-                          icon={Icon.Phone}
-                          onAction={() => dial(c.id, p.value, "tel")}
+                          title={`${ACTION_VERB[defaultScheme]} ${p.label} · ${formatDisplay(p.value)}`}
+                          icon={ACTION_ICON[defaultScheme]}
+                          onAction={() => dial(c.id, p.value, defaultScheme)}
                         />
                       ))}
                     </ActionPanel.Section>
                   )}
                   <ActionPanel.Section>
-                    <Action
-                      title="FaceTime Audio"
-                      icon={Icon.Microphone}
-                      shortcut={{ modifiers: ["cmd"], key: "a" }}
-                      onAction={() =>
-                        dial(c.id, primary.value, "facetime-audio")
-                      }
-                    />
-                    <Action
-                      title="FaceTime Video"
-                      icon={Icon.Video}
-                      shortcut={{ modifiers: ["cmd"], key: "v" }}
-                      onAction={() => dial(c.id, primary.value, "facetime")}
-                    />
+                    {defaultScheme !== "tel" && (
+                      <Action
+                        title="Call (Phone)"
+                        icon={Icon.Phone}
+                        shortcut={{ modifiers: ["cmd"], key: "p" }}
+                        onAction={() => dial(c.id, primary.value, "tel")}
+                      />
+                    )}
+                    {defaultScheme !== "facetime-audio" && (
+                      <Action
+                        title="FaceTime Audio"
+                        icon={Icon.Microphone}
+                        shortcut={{ modifiers: ["cmd"], key: "a" }}
+                        onAction={() =>
+                          dial(c.id, primary.value, "facetime-audio")
+                        }
+                      />
+                    )}
+                    {defaultScheme !== "facetime" && (
+                      <Action
+                        title="FaceTime Video"
+                        icon={Icon.Video}
+                        shortcut={{ modifiers: ["cmd"], key: "v" }}
+                        onAction={() => dial(c.id, primary.value, "facetime")}
+                      />
+                    )}
                     <Action.CopyToClipboard
                       title="Copy Number"
                       content={primary.value}

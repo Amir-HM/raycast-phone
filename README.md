@@ -35,4 +35,4 @@ Contacts never leave your Mac. They're cached in Raycast's local storage for 24 
 
 ## Why this exists
 
-The existing Quick Call extension requires you to type the full number. This one searches your Contacts and dials the right person with one keystroke.
+Built for searching Contacts by name and dialing the right person with a single keystroke — no number memorisation, no extra clicks.
