@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phone",
+  "title": "Phone",
+  "description": "Call anyone in your Contacts through your iPhone in two keystrokes via macOS Continuity.",
+  "icon": "extension-icon.png",
+  "author": "amir",
+  "categories": ["Communication", "Productivity"],
+  "keywords": [
+    "phone",
+    "call",
+    "dial",
+    "dialer",
+    "contacts",
+    "contact",
+    "facetime",
+    "continuity",
+    "iphone",
+    "speed dial",
+    "click to call",
+    "ring"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "call",
+      "title": "Call",
+      "subtitle": "Phone",
+      "description": "Search a contact and call them through your iPhone with one keystroke.",
+      "mode": "view",
+      "keywords": [
+        "phone",
+        "dial",
+        "facetime",
+        "contact",
+        "continuity",
+        "iphone",
+        "ring",
+        "speed dial"
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Name",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "refresh-contacts",
+      "title": "Refresh Contacts",
+      "subtitle": "Phone",
+      "description": "Rebuild the cached contacts list from macOS Contacts.",
+      "mode": "no-view",
+      "keywords": ["contacts", "refresh", "sync", "reload"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.0.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
